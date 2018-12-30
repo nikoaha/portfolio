@@ -56,9 +56,9 @@ public class FightController : MonoBehaviour
     }
 
     
-    void healthReduceMorssi () {                                                                // this function is called by your character's separate controller code
+    void healthReduceMorssi () {                                                                // this function is called by MorssiController
         if (Input.GetKeyDown (KeyCode.Space)) {                                                 // If spacebar is pushed down...
-          lifeBarMorssi.gameObject.transform.localScale -= new Vector3 (damage, 0, 0);          // The healthbar is reduced...
+          lifeBarMorssi.gameObject.transform.localScale -= new Vector3 (damage, 0, 0);          // The healthbar's graphics is reduced...
           hitpoint -= damage;                                                                   // and reduce the healthpoints itself
         }
     }
