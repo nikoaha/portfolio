@@ -1,0 +1,84 @@
+// ZUMO ROBOT PROJECT
+// WITH 2 OF 6 SENSORS IN USE
+
+int main()
+{
+    struct sensors_ ref;
+    int max = 16000;
+    int min = 9000;
+    float anturiOikea = 0;
+    float anturiVasen = 0;
+    int tavoite = 1;
+    float eroOikea = 0;
+    float eroVasen = 0;
+    float ohjausVasen = 0;
+    float ohjausOikea = 0;
+    int moottoriVasen = 0;
+    int moottoriOikea = 0;
+    float edellinenEroOikea = 0;
+    float edellinenEroVasen = 0;
+
+    Systick_Start();
+
+    CyGlobalIntEnable;
+    UART_1_Start();
+    motor_start();
+
+    reflectance_start();
+
+    for(;;)
+    {
+
+    reflectance_read(&amp;ref);
+
+    if (ref.r1 &gt; max) {
+        anturiOikea = 1;
+    } else if (ref.r1 &lt; min) {
+        anturiOikea = 0;
+    } else {
+        anturiOikea = (1.0 * ref.r1 - min) / (max - min);
+    }
+
+    if (ref.l1 &gt; max) {
+        anturiVasen = 1;
+    } else if (ref.l1 &lt; min) {
+        anturiVasen = 0;
+    } else {
+        anturiVasen = (1.0 * ref.l1 - min) / (max - min);
+    }
+
+    eroOikea = (float)tavoite - anturiOikea;
+    eroVasen = (float)tavoite - anturiVasen;
+
+    ohjausOikea = 200 * eroOikea + 200 * (eroOikea - edellinenEroOikea);
+    ohjausVasen = 200 * eroVasen + 200 * (eroVasen - edellinenEroVasen);
+
+    moottoriVasen = 255 - ohjausOikea;
+    moottoriOikea = 255 - ohjausVasen;
+
+    if (moottoriOikea &gt; 254) {
+        moottoriOikea = 255;
+    }
+
+    if (moottoriOikea &lt; 0) {
+        moottoriOikea = 0;
+    }
+
+    if (moottoriVasen &gt; 254) {
+        moottoriVasen = 255;
+    }
+
+    if (moottoriVasen &lt; 0) {
+        moottoriVasen = 0;
+    }
+
+    drive_forward(moottoriVasen, moottoriOikea, 0);
+
+    edellinenEroOikea = eroOikea;
+    edellinenEroVasen = eroVasen;
+
+    CyDelay(1);
+
+    }
+}
+
