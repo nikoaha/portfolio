@@ -1,0 +1,71 @@
+// MorssiController
+// This file controls the final bosses or the 'Morssi'.
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class FightController : MonoBehaviour
+{
+    public Sprite ryuSpriteIdle;
+    public Sprite ryuSpriteKick;
+    public Sprite ryuSpriteDead;
+    public MorssiController mC; 
+    private bool bullIsDead = false; 
+    private SpriteRenderer spriteRendererBull;
+    public GameObject lifeBarMorssi;
+
+    private float hitpoint = 45.0f;
+    private float damage = 0.60f;
+
+    void Start ()
+    {
+        spriteRendererBull = GetComponent<SpriteRenderer> ();         // access the SpriteRenderer that is attached to the Gameobject
+        if (spriteRendererBull.sprite == null)                        // if the sprite on spriteRenderer is null then
+            spriteRendererBull.sprite = ryuSpriteIdle;                // set the sprite to ryuSpriteIdle
+
+        lifeBarMorssi = GameObject.Find ("lifeBarMorssiHealth");
+
+        mC = FindObjectOfType (typeof(MorssiController)) as MorssiController;
+
+        //StartCoroutine (bullDeathScript());
+    }
+
+    void Update ()
+    {
+        bullAttackSystem ();                                          // summon for bullAttackSystem
+
+        if (hitpoint <= 0) {
+          bullKnockOutsMorssi ();
+        }
+    }
+
+    void bullAttackSystem () { //bull's attack system
+        if (Input.GetKey (KeyCode.Space) && hitpoint >= 0 && bullIsDead == false) { // If the spacebar is pushed down...
+          spriteRendererBull.sprite = ryuSpriteKick;                                // idle to kick
+          healthReduceMorssi();
+        } else {
+          spriteRendererBull.sprite = ryuSpriteIdle;                                // kick to idle
+        }
+    }
+
+    
+    void healthReduceMorssi () {                                                                // this function is called by your character's separate controller code
+        if (Input.GetKeyDown (KeyCode.Space)) {                                                 // If spacebar is pushed down...
+          lifeBarMorssi.gameObject.transform.localScale -= new Vector3 (damage, 0, 0);          // The healthbar is reduced...
+          hitpoint -= damage;                                                                   // and reduce the healthpoints itself
+        }
+    }
+
+    void bullKnockOutsMorssi () {
+        mC.morssiDeathScript ();                    
+    }
+
+    public void bullDeathScript () {
+        spriteRendererBull.sprite = ryuSpriteDead; // idle to kick
+        bullIsDead = true; 
+        //yield return new WaitForSecondsRealtime(2.0f);
+        //SceneManager.LoadScene("helsinkiMiniGame");
+    }
+}
