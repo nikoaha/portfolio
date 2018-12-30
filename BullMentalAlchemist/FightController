@@ -1,5 +1,5 @@
-// MorssiController
-// This file controls the final bosses or the 'Morssi'.
+// FightController
+// This file contains the corresponding actions for the playable character.
 
 using System.Collections;
 using System.Collections.Generic;
