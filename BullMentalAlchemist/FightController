@@ -1,4 +1,9 @@
-// FightController
+// The final battle controls are executed via two separate files,
+// which have a dialogue between themselves during execution.
+// Mostly to check if either one of the characters have run out of 
+// heatlh. (= Dead)
+
+// (1/2) FightController
 // This file contains the corresponding actions for the playable character.
 
 using System.Collections;
