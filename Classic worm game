@@ -1,0 +1,701 @@
+/*  
+    comment: December 31st, 2018
+    
+    This is the beta-level release.
+    There are critical bugs in the generation of the edible objects
+    and the 'spike' obstacles.
+    The code should be divided in a few separate files too.
+    To be cleaned in the near future.
+*/
+
+//*****START OF CODE*****
+
+// snake game re-implementation
+// NIKO HAAPALAINEN 1706789
+// C-programming in Smart Systems, period 1, autumn 2018.
+
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+
+#define KEY_UP 72
+#define KEY_DOWN 80
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
+#define KEY_ESCAPE 27
+#define KEY_ENTER 13
+#define KEY_A 97
+
+// All the instances of the functions of the game.
+// In logical order.
+int startScreen();
+int gameController();
+int youDiedScreen(points);
+int instructionsScreen();
+int keyChecker(points);
+
+// The program starts here.
+int main(void)
+{
+	startScreen();
+}
+
+// gamecontroller() function calculates the procedures and prints out the game to the console screen.
+// X AND Y COORDINATES ARE INVERTED. SEE THE DOC FOR MORE.
+int gameController()
+{
+	// Instance variabes.
+	int snakeStarter = 1;
+	int wormEaten = 1;
+	int spikeSpreader = 0;
+	int snakePart = 254;
+	int ch = 0;
+	int y2 = 2;
+	int x2 = 3;
+	int y = 2;
+	int x = 4;
+	int wormY = 0;
+	int wormX = 0;
+	int	points = -1;
+	int lastDir = 0;
+
+	// The earlier array version never worked.
+	// Thus all the spikes' coordinates are given here separately.
+	int spike1y = 0;
+	int spike1x = 0;
+	int spike2y = 0;
+	int spike2x = 0;
+	int spike3y = 0;
+	int spike3x = 0;
+	int spike4y = 0;
+	int spike4x = 0;
+	int spike5y = 0;
+	int spike5x = 0;
+	int spike6y = 0;
+	int spike6x = 0;
+	int spike7y = 0;
+	int spike7x = 0;
+	int spike8y = 0;
+	int spike8x = 0;
+	int spike9y = 0;
+	int spike9x = 0;
+	int spike10y = 0;
+	int spike10x = 0;
+	int spike11y = 0;
+	int spike11x = 0;
+	int spike12y = 0;
+	int spike12x = 0;
+	int spike13y = 0;
+	int spike13x = 0;
+	int spike14y = 0;
+	int spike14x = 0;
+	int spike15y = 0;
+	int spike15x = 0;
+
+
+	// The designated play area for the game to move the snake around.
+	// 32 and 42 are ASCII values.
+	// 32 = ' '
+	// 42 = '*'
+	int playArea[6][15] = { {42,32,42,32,42,32,42,32,42,32,42,32,42,32,42},
+						    {42,32,32,32,32,32,32,32,32,32,32,32,32,32,42},
+						    {42,32,32,32,32,32,32,32,32,32,32,32,32,32,42},
+						    {42,32,32,32,32,32,32,32,32,32,32,32,32,32,42},
+						    {42,32,32,32,32,32,32,32,32,32,32,32,32,32,42},
+						    {42,32,42,32,42,32,42,32,42,32,42,32,42,32,42} };
+
+	// To update the game screen in every snake movement.
+	while (1)
+	{
+		// To initiate the start point for the snake in the play area.
+		if (snakeStarter == 1)
+		{
+			playArea[y][x] = snakePart;
+			playArea[y2][x2] = snakePart;
+			snakeStarter = 0;
+		}
+
+		// Randomly generate the worm position to be eaten in the play area.
+		// When a worm is eaten, this if statement generates the new position in the play area.
+		if (wormEaten == 1)
+		{
+			wormY = (rand() % 4 + 1);
+			wormX = (rand() % 12 + 2);
+			playArea[wormY][wormX] = 's';
+			wormEaten = 0;
+			points++;
+		}
+
+		// Generate randomly a spike position in the play area.
+		if (spikeSpreader == 1)
+		{
+			if (spike1y == 0 && spike1x == 0)
+			{
+				spike1y = (rand() % 4 + 1);
+				spike1x = (rand() % 13 + 2);
+
+				// If the first spike is generated to a spot where the snake or the worm is,
+				// it is relocated a unit above.
+				if ((spike1y != y && spike1x != x) || (spike1y != y2 && spike1x != x2) || (spike1y != wormY && spike1x != wormX))
+				{
+					spike1y--;
+				}
+		
+				playArea[spike1y][spike1x] = 'x';
+			}
+			// etc.
+			else if (spike2y == 0 && spike2x == 0) 
+			{
+				spike2y = (rand() % 4 + 1);
+				spike2x = (rand() % 13 + 2);
+
+				if ((spike2y == y && spike2x == x) || (spike2y == y2 && spike2x == x2) || (spike2y == wormY && spike2x == wormX))
+				{
+					spike2y--;
+				}
+
+				playArea[spike2y][spike2x] = 'x';
+			}
+			else if (spike3y == 0 && spike3x == 0)
+			{
+				spike3y = (rand() % 4 + 1);
+				spike3x = (rand() % 13 + 2);
+
+				if ((spike3y == y && spike3x == x) || (spike3y == y2 && spike3x == x2) || (spike3y == wormY && spike3x == wormX))
+				{
+					spike3y--;
+				}
+
+				playArea[spike3y][spike3x] = 'x';
+			}
+			else if (spike4y == 0 && spike4x == 0)
+			{
+				spike4y = (rand() % 4 + 1);
+				spike4x = (rand() % 13 + 2);
+
+				if ((spike4y == y && spike4x == x) || (spike4y == y2 && spike4x == x2) || (spike4y == wormY && spike4x == wormX))
+				{
+					spike4y--;
+				}
+
+				playArea[spike4y][spike4x] = 'x';
+			}
+			else if (spike5y == 0 && spike5x == 0)
+			{
+				spike5y = (rand() % 4 + 1);
+				spike5x = (rand() % 13 + 2);
+
+				if ((spike5y == y && spike5x == x) || (spike5y == y2 && spike5x == x2) || (spike5y == wormY && spike5x == wormX))
+				{
+					spike5y--;
+				}
+
+				playArea[spike5y][spike5x] = 'x';
+			}
+			else if (spike6y == 0 && spike6x == 0)
+			{
+				spike6y = (rand() % 4 + 1);
+				spike6x = (rand() % 13 + 2);
+
+				if ((spike6y == y && spike6x == x) || (spike6y == y2 && spike6x == x2) || (spike6y == wormY && spike6x == wormX))
+				{
+					spike6y--;
+				}
+
+				playArea[spike6y][spike6x] = 'x';
+			}
+			else if (spike7y == 0 && spike7x == 0)
+			{
+				spike7y = (rand() % 4 + 1);
+				spike7x = (rand() % 13 + 2);
+
+				if ((spike7y == y && spike7x == x) || (spike7y == y2 && spike7x == x2) || (spike7y == wormY && spike7x == wormX))
+				{
+					spike7y--;
+				}
+
+				playArea[spike7y][spike7x] = 'x';
+			}
+			else if (spike8y == 0 && spike8x == 0)
+			{
+				spike8y = (rand() % 4 + 1);
+				spike8x = (rand() % 13 + 2);
+
+				if ((spike8y == y && spike8x == x) || (spike8y == y2 && spike8x == x2) || (spike8y == wormY && spike8x == wormX))
+				{
+					spike8y--;
+				}
+
+				playArea[spike8y][spike8x] = 'x';
+			}
+			else if (spike9y == 0 && spike9x == 0)
+			{
+				spike9y = (rand() % 4 + 1);
+				spike9x = (rand() % 13 + 2);
+
+				if ((spike9y == y && spike9x == x) || (spike9y == y2 && spike9x == x2) || (spike9y == wormY && spike9x == wormX))
+				{
+					spike9y--;
+				}
+
+				playArea[spike9y][spike9x] = 'x';
+			}
+			else if (spike10y == 0 && spike10x == 0)
+			{
+				spike10y = (rand() % 4 + 1);
+				spike10x = (rand() % 13 + 2);
+
+				if ((spike10y == y && spike10x == x) || (spike10y == y2 && spike10x == x2) || (spike10y == wormY && spike10x == wormX))
+				{
+					spike10y--;
+				}
+
+				playArea[spike10y][spike10x] = 'x';
+			}
+			else if (spike11y == 0 && spike11x == 0)
+			{
+				spike11y = (rand() % 4 + 1);
+				spike11x = (rand() % 13 + 2);
+
+				if ((spike11y == y && spike11x == x) || (spike11y == y2 && spike11x == x2) || (spike11y == wormY && spike11x == wormX))
+				{
+					spike11y--;
+				}
+
+				playArea[spike11y][spike11x] = 'x';
+			}
+			else if (spike12y == 0 && spike12x == 0)
+			{
+				spike12y = (rand() % 4 + 1);
+				spike12x = (rand() % 13 + 2);
+
+				if ((spike12y == y && spike12x == x) || (spike12y == y2 && spike12x == x2) || (spike12y == wormY && spike12x == wormX))
+				{
+					spike12y--;
+				}
+
+				playArea[spike12y][spike12x] = 'x';
+			}
+			else if (spike13y == 0 && spike13x == 0)
+			{
+				spike13y = (rand() % 4 + 1);
+				spike13x = (rand() % 13 + 2);
+
+				if ((spike13y == y && spike13x == x) || (spike13y == y2 && spike13x == x2) || (spike13y == wormY && spike13x == wormX))
+				{
+					spike13y--;
+				}
+
+				playArea[spike13y][spike13x] = 'x';
+			}
+			else if (spike14y == 0 && spike14x == 0)
+			{
+				spike14y = (rand() % 4 + 1);
+				spike14x = (rand() % 13 + 2);
+
+				if ((spike14y == y && spike14x == x) || (spike14y == y2 && spike14x == x2) || (spike14y == wormY && spike14x == wormX))
+				{
+					spike14y--;
+				}
+
+				playArea[spike14y][spike14x] = 'x';
+			}
+			else if (spike15y == 0 && spike15x == 0)
+			{
+				spike15y = (rand() % 4 + 1);
+				spike15x = (rand() % 13 + 2);
+
+				if ((spike15y == y && spike15x == x) || (spike15y == y2 && spike15x == x2) || (spike15y == wormY && spike15x == wormX))
+				{
+					spike15y--;
+				}
+
+				playArea[spike15y][spike15x] = 'x';
+			}
+			spikeSpreader = 0;
+		}
+
+		// If the first square (or the head) of the snake is on the same position as the worm,
+		// the worm character 's' is replaced by a snakepart and a new position for the worm is generated in the next loop cycle.
+		// (Basicly, the snake eats the worm and a new worm appears.)
+		if (wormY == y && wormX == x)
+		{
+			playArea[wormY][wormX] = snakePart;
+			wormEaten = 1;
+			spikeSpreader = 1;
+		}
+
+		// Snake position and play area are printed along with this array printer.
+		// The result is also printed to the bottom of the screen.
+		for (int i = 0; i < 6; i++)
+		{
+			for (int j = 0; j < 15; j++)
+			{
+				printf("%c", playArea[i][j]);
+			}
+			printf("\n");
+		}
+		printf(" Worms eaten: %d\n", points);
+
+		// If the snake moves to the spots at x=0, x=4, y=0, y=8 and thus crosses the play area, player loses.
+		if (y == 0 || x == 0 || y == 5 || x == 14)
+		{
+			break;
+		}
+
+		// Checks if the snake head is on a spike. 
+		// If so, the loop will break and the game is over.		
+		if (spike1y == y && spike1x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike2y == y && spike2x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike3y == y && spike3x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike4y == y && spike4x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike5y == y && spike5x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike6y == y && spike6x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike7y == y && spike7x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike8y == y && spike8x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike9y == y && spike9x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike10y == y && spike10x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike11y == y && spike11x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike12y == y && spike12x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike13y == y && spike13x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike14y == y && spike14x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+		else if (spike15y == y && spike15x == x)
+		{
+			playArea[y][x] = snakePart;
+			break;
+		}
+
+		// A delay of 0.25 seconds between each frame update.
+		_sleep(250);
+
+		// Calls the keyChecker function for the snake direction.
+		ch = keyChecker(ch);
+
+		// Moves to the chosen direction.
+		switch (ch)
+		{
+		case KEY_UP: //MOVE UP
+			// if there is no spike or worm generated on the snake's current position,
+			// it will be cleared in the next print.
+			// Otherwise no changes are made.
+			if ((playArea[y2][x2] != 'x') || (playArea[y2][x2] = 's')) 
+			{
+				playArea[y2][x2] = ' ';
+			}
+
+			if (x2 < x) // TURN UP FROM RIGHT
+			{
+				y--;
+				x2++;
+			}
+			else if (x < x2) // TURN UP FROM LEFT
+			{
+				y--;
+				x2--;
+			}
+			else // STAY MOVING UP
+			{
+				y--;
+				y2--;
+			}
+
+			// forward the transformed coordinates to the play area.
+			playArea[y2][x2] = snakePart;
+			playArea[y][x] = snakePart;
+			break;
+
+		case KEY_DOWN: //MOVE DOWN
+			if ((playArea[y2][x2] != 'x') || (playArea[y2][x2] = 's'))
+			{
+				playArea[y2][x2] = ' ';
+			}
+
+			if (x < x2) // TURN DOWN FROM RIGHT
+			{
+				y++;
+				x2--;
+			}
+			else if (x2 < x) // TURN DOWN FROM LEFT
+			{
+				y++;
+				x2++;
+			}
+			else // STAY MOVING DOWN
+			{
+				y++;
+				y2++;
+			}
+			playArea[y2][x2] = snakePart;
+			playArea[y][x] = snakePart;
+
+			break;
+		case KEY_LEFT: //MOVE LEFT
+			if ((playArea[y2][x2] != 'x') || (playArea[y2][x2] = 's'))
+			{
+				playArea[y2][x2] = ' ';
+			}
+
+			if (y < y2) // TURN LEFT FROM UP DIR
+			{
+				x--;
+				y2--;
+			}
+			else if (y2 < y) // TURN LEFT FROM DOWN DIR
+			{
+				x--;
+				y2++;
+			}
+			else // STAY MOVING LEFT
+			{
+				x--;
+				x2--;
+			}
+
+			playArea[y2][x2] = snakePart;
+			playArea[y][x] = snakePart;
+			break;
+		case KEY_RIGHT: //MOVE RIGHT
+			if ((playArea[y2][x2] != 'x') || (playArea[y2][x2] = 's'))
+			{
+				playArea[y2][x2] = ' ';
+			}
+
+			if (y2 < y) // TURN RIGHT FROM DOWN DIR
+			{
+				x++;
+				y2++;
+			}
+			else if (y < y2) // TURN RIGHT FROM UP DIR
+			{
+				x++;
+				y2--;
+			}
+			else // STAY MOVING RIGHT
+			{
+				x++;
+				x2++;
+			}
+
+			playArea[y2][x2] = snakePart;
+			playArea[y][x] = snakePart;
+			break;
+
+		case 0: // INSTANCE DIRECTION RIGHT AT THE START OF THE GAME.
+			if (lastDir == 0)
+			{
+				if ((playArea[y2][x2] != 'x') || (playArea[y2][x2] = 's'))
+				{
+					playArea[y2][x2] = ' ';
+				}
+
+				x++;
+				x2++;
+				playArea[y2][x2] = snakePart;
+				playArea[y][x] = snakePart;
+			}
+			else 
+			{
+			
+			}
+			break;
+		}
+		
+		// The screen is cleared.
+		system("cls");
+	}
+
+	system("cls");
+	youDiedScreen(points);
+	return 0;
+}
+
+// For player direction moves.
+int keyChecker(int ch) 
+{
+	// kbhit() function waits for snake direction moves.
+	// As a default, _getch() gets integer '224' first, then it gets the corresponding direction integer
+	// and passes it to the switch statement beneath.
+	while (kbhit())
+	{
+		ch = _getch();
+		if (ch == 224)
+		{
+			ch = _getch();
+		}
+	}
+	
+	return ch;
+}
+
+// Displays the game over screen.
+int youDiedScreen(int points)
+{
+	while (1)
+	{
+		int ch = 0;
+
+		printf("\n                You died!");
+		printf("\n");
+		printf("\n              Your score: %d", points);
+		printf("\n");
+		printf("\n    To play again, press ENTER button.");
+		printf("\n      To quit, press ESCAPE button.");
+		printf("\n");
+
+		// Waits for the player to press ENTER or ESCAPE key.
+		ch = _getch();
+		if (ch == 224)
+		{
+			ch = _getch();
+		}
+
+		if (ch == KEY_ENTER)
+		{
+			system("cls");
+			gameController();
+			break;
+		}
+		else if (ch == KEY_ESCAPE)
+		{
+			break;
+		}
+
+		system("cls");
+	}
+	return 0;
+}
+
+// The welcome screen printed at the beginning.
+int startScreen()
+{
+	while (1) 
+	{
+		int ch = 0;
+
+		printf("\n    SNAKE GAME v. Smart Systems 2018");
+		printf("\n          By Niko Haapalainen");
+		printf("\n");
+		printf("\n         Press ENTER to start!");
+		printf("\n       Press A for instructions!");
+		printf("\n");
+
+		// Waits for the player to press ENTER or ESCAPE key.
+		ch = _getch();
+		if (ch == 224)
+		{
+			ch = _getch();
+		}
+
+		if (ch == KEY_ENTER)
+		{
+			system("cls");
+			gameController();
+			break;
+		}
+		else if (ch == KEY_A)
+		{
+			system("cls");
+			instructionsScreen();
+			break;
+		}
+		system("cls");
+	}
+	return 0;
+}
+
+// The intructions screen to see the instructions.
+int instructionsScreen()
+{
+	while (1)
+	{
+		int ch = 0;
+
+		printf("\n    Your objective is to guide your snake");
+		printf("\n     through the playground and eat every");
+		printf("\n      puny worm that comes in your way!");
+		printf("\n");
+		printf("\n    But stay away from the stubborn spikes,");
+		printf("\n       they can wipe you out instantly!");
+		printf("\n");
+		printf("\n     Use the directional buttons to move.");
+		printf("\n");
+		printf("\n            Press ENTER to return");
+		printf("\n");
+
+		// Waits for the player to press ENTER key.
+		ch = _getch();
+		if (ch == 224)
+		{
+			ch = _getch();
+		}
+
+		if (ch == KEY_ENTER)
+		{
+			system("cls");
+			startScreen();
+			break;
+		}
+		system("cls");
+		ch = 0;
+	}
+
+	return 0; 
+}
+
+//*****END OF CODE*****
