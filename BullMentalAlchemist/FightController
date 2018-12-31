@@ -4,7 +4,7 @@
 // heatlh. (= Dead)
 
 // (1/2) FightController
-// This file contains the corresponding actions for the playable character.
+// This file contains the corresponding actions for the playable 'Bull' character.
 
 using System.Collections;
 using System.Collections.Generic;
