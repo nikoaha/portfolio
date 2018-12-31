@@ -1,0 +1,31 @@
+*
+    The 'Mindstorms' battle robot consists of six .java files.
+    This .java file's code controls the weapon motors of the robot.
+    The Mindstorms has it's own 'lejos' library containing built-in methods ready for use.
+    Here we harvest them.
+/*
+
+package REXA;
+
+import lejos.robotics.RegulatedMotor;
+
+public class Ase {
+	
+	private RegulatedMotor mD;
+	private RegulatedMotor mC;
+	
+	public Ase(Moottori moottori) {
+		mD = moottori.getmD();
+		mC = moottori.getmC();
+	}
+	
+	public void shootEr() {
+		mD.setSpeed(700);
+		mD.rotate(360);
+	}
+
+	public void knife() {
+		mC.setSpeed(1500);
+		mC.backward();
+	}
+}
