@@ -1,9 +1,9 @@
-*
+/*
     The 'Mindstorms' battle robot consists of six .java files.
     This .java file's code controls the weapon motors of the robot.
     The Mindstorms has it's own 'lejos' library containing built-in methods ready for use.
     Here we harvest them.
-/*
+*/
 
 package REXA;
 
