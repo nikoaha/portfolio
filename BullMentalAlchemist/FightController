@@ -4,7 +4,8 @@
 // heatlh. (= Dead)
 
 // (1/2) FightController
-// This file contains the corresponding actions for the playable 'Bull' character.
+// This file contains the main control of the battle scene flow  
+// AND corresponding actions for the our controllable 'Bull' character.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ public class FightController : MonoBehaviour
 
         mC = FindObjectOfType (typeof(MorssiController)) as MorssiController;
 
-        //StartCoroutine (bullDeathScript());
+        StartCoroutine (bullDeathScript());                           // to activate the delay function
     }
 
     void Update ()
@@ -46,7 +47,7 @@ public class FightController : MonoBehaviour
         }
     }
 
-    void bullAttackSystem () { //bull's attack system
+    void bullAttackSystem () {                                                      //bull's attack system
         if (Input.GetKey (KeyCode.Space) && hitpoint >= 0 && bullIsDead == false) { // If the spacebar is pushed down...
           spriteRendererBull.sprite = ryuSpriteKick;                                // idle to kick
           healthReduceMorssi();
@@ -70,7 +71,7 @@ public class FightController : MonoBehaviour
     public void bullDeathScript () {
         spriteRendererBull.sprite = ryuSpriteDead; // idle to kick
         bullIsDead = true; 
-        //yield return new WaitForSecondsRealtime(2.0f);
-        //SceneManager.LoadScene("helsinkiMiniGame");
+        yield return new WaitForSecondsRealtime(2.0f);
+        SceneManager.LoadScene("helsinkiMiniGame");
     }
 }
