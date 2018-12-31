@@ -1,0 +1,30 @@
+/*
+    The 'Mindstorms' battle robot consists of six .java files.
+    This .java file's code controls the audio of the robot.
+    The Mindstorms has it's own 'lejos' library containing built-in methods ready for use.
+    Here we harvest them.
+*/
+
+package REXA;
+
+import java.io.File;
+import lejos.hardware.Sound;
+
+public class Music {
+		
+	public void startUp() {
+		File music = new File("ready.wav");
+		Sound.playSample(music, 100);
+	}
+		
+	public void laugh() {
+		File music = new File("laugh.wav");
+		Sound.playSample(music, 100);
+	}
+		
+	public void warning() {
+		File music = new File("warn.wav");
+		Sound.playSample(music, 100);
+	
+	}
+}
