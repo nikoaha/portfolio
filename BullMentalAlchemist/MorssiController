@@ -1,0 +1,81 @@
+// The final battle controls are executed via two separate files,
+// which have a dialogue between themselves during execution.
+// That is to check if either one of the characters have run out of 
+// heatlh. (= Dead)
+
+// (2/2) MorssiController
+// This file contains the corresponding actions for the final boss 'Morssi' character.
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class MorssiController : MonoBehaviour
+{
+
+	public Sprite morssiSpriteIdle; // Sprite for morssiSpriteIdle
+	public Sprite morssiSpriteKick; // Sprite for morssiSpriteKick
+	public Sprite morssiSpriteDead;
+	public FightController bC;
+	private bool morssiIsDead = false;
+	public SpriteRenderer spriteRendererMorssi;
+	public GameObject lifeBarBull;
+
+	private float hitpoint = 45.0f;
+	private float damage = 2.0f;
+
+
+	void Start ()
+	{
+		spriteRendererMorssi = GetComponent<SpriteRenderer> ();                                // accessing to the SpriteRenderer that is attached to the Gameobject
+		if (spriteRendererMorssi.sprite == null)                                               // if the sprite in spriteRenderer is null then
+			spriteRendererMorssi.sprite = morssiSpriteIdle;                                      // set the sprite to sprite1
+
+		StartCoroutine (morssiAttackSystem ());                                                // to make the delay possible, we use startCoroutine
+
+		lifeBarBull = GameObject.Find ("lifeBarBullHealth");                                   
+
+		bC = FindObjectOfType (typeof(FightController)) as FightController;
+	}
+
+	void Update ()
+	{
+		morssiAttackSystem ();                                                                 //summon for morssiAttackSystem
+
+		if (hitpoint <= 0) {
+			morssiKnocksOutBull ();
+		}
+	}
+		
+	IEnumerator morssiAttackSystem() {                                                       // the main attack system
+		while (morssiIsDead == false && hitpoint >= 0) {
+			spriteRendererMorssi.sprite = morssiSpriteIdle; // idle to kick
+			yield return new WaitForSecondsRealtime(0.2f); // hold idle sprite in screen
+			spriteRendererMorssi.sprite = morssiSpriteKick; // idle to kick
+			healthReduceBull();
+			yield return new WaitForSecondsRealtime(0.2f); // hold kick sprite in screen
+		}
+	}
+
+	void healthReduceBull() {
+		lifeBarBull.gameObject.transform.localScale -= new Vector3 (damage,0,0);
+		hitpoint -= damage;
+	}
+
+	void morssiKnocksOutBull() {
+		bC.bullDeathScript ();
+	}
+
+	public void morssiDeathScript() {
+		spriteRendererMorssi.sprite = morssiSpriteDead;
+		morssiIsDead = true;
+		//yield return new WaitForSecondsRealtime(3.0f); // hold kick sprite in screen
+		SceneManager.LoadScene("gameFinished");                                                // if Morssi is beaten, move on to the next scene
+                                                                                            
+	}
+}
+
+
+
+
