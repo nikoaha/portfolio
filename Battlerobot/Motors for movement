@@ -1,0 +1,99 @@
+*
+    The 'Mindstorms' battle robot consists of six .java files.
+    This .java file's code controls the tracks of the robot.
+    The Mindstorms has it's own 'lejos' library containing built-in methods ready for use.
+    Here we harvest them.
+/*
+
+package REXA;
+
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.port.MotorPort;
+import lejos.robotics.RegulatedMotor;
+
+public class Moottori extends Thread {
+	
+	RegulatedMotor mA = new EV3LargeRegulatedMotor(MotorPort.A);
+	RegulatedMotor mB = new EV3LargeRegulatedMotor(MotorPort.B);
+	RegulatedMotor mD = new EV3LargeRegulatedMotor(MotorPort.D);
+	RegulatedMotor mC = new EV3MediumRegulatedMotor(MotorPort.C);
+	
+	public RegulatedMotor getmA() {
+		return mA;
+	}
+	
+	public RegulatedMotor getmB() {
+		return mB;
+	}
+	
+	public RegulatedMotor getmD() {
+		return mD;
+	}
+	
+	public RegulatedMotor getmC() {
+		return mC;
+	}
+	
+	public void forward() {
+		mA.setSpeed(700);
+		mB.setSpeed(700);
+
+		mA.synchronizeWith(new RegulatedMotor[] { mB });
+		mA.startSynchronization();
+		mA.setSpeed(700);
+		mB.setSpeed(700);
+		mA.forward();
+		mB.forward();
+		mA.endSynchronization();
+	}
+
+	public void backward() {
+		mA.synchronizeWith(new RegulatedMotor[] { mB });
+		mA.setSpeed(500);
+		mB.setSpeed(500);
+		mA.startSynchronization();
+		mA.backward();
+		mB.backward();
+		mA.endSynchronization();
+	}
+
+	public void turnRight() {
+		mA.setSpeed(500);
+		mB.setSpeed(500);
+		mA.synchronizeWith(new RegulatedMotor[] { mB });
+		mA.startSynchronization();
+		mA.forward();
+		mB.backward();
+		mA.endSynchronization();
+	}
+
+	public void turnLeft() {
+		mA.setSpeed(500);
+		mB.setSpeed(500);
+		mA.synchronizeWith(new RegulatedMotor[] { mB });
+		mA.startSynchronization();
+		mA.backward();
+		mB.forward();
+		mA.endSynchronization();
+	}
+
+	public void stopMotor() {
+		mA.synchronizeWith(new RegulatedMotor[] { mB });
+		mA.startSynchronization();
+		mA.stop();
+		mB.stop();
+		mA.endSynchronization();
+		mC.stop();
+		mD.stop();
+	}
+
+	public void closeMotor() {
+		mA.close();
+		mB.close();
+		mC.close();
+		mD.close();
+	}
+	
+	
+}
