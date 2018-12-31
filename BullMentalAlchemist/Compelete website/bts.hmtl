@@ -1,0 +1,190 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="manifest" href="site.webmanifest">
+        <link rel="apple-touch-icon" href="icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+	
+        <!-- Add your site or application content here -->
+		
+		<!-- Side navigation -->
+		<nav>
+			<section>
+			<div class="sidenav">
+				<a href="index.html">Start Page</a>
+				<a href="game.html">The Game</a>
+				<a href="bts.html">BTS</a>
+				<a href="conceptart.html">Concept Art</a>
+				<a href="bugs.html">Bugs</a>
+			</div>
+			</section>
+		</nav>
+		
+		<!-- Page content -->
+		<main>
+			<section>
+				<div id="main" class="figcaptioner">
+					
+					<!-- The title (.jpg) -->	
+					<figure>
+						<img src="img/logoBehindTheScenes.jpg" alt="BTS title">
+						<br>
+					</figure>
+					
+					<!-- The header -->
+					<section class="pages-text-styling">
+						<h2>The devoted personnel behind the game...</h2>
+						<br>
+					</section>
+					
+					<!-- The first picture -->
+					<figure>
+						<img class="img-radius" src="img/teamctr.jpg" alt="Team CTR posing">
+						<figcaption>Team CTR in its finest state.</figcaption>
+						<br>
+					</figure>
+					
+					<!-- The first paragraph -->
+					<article>
+						<p class="story-time">"It has been a journey!", said co-developer Niko Haapalainen 
+						after finishing the game project. "The whole team has earned a medal for the hardwork.", he 
+						added.
+						<br><br>
+						Team CTR has experienced tears, sweat and sacrificed many hours for 
+						the project. Now the project has successfully come to an end. What are the other
+						team members' feelings?
+						<br><br>
+						co-dev Roope: "Slipknot... wasted!"<br>
+						co-dev Henrik: "The solution is in Archspire."<br>
+						co-dev Ville: "What?"</p>
+						<br>
+					</article>
+					
+					<!-- The second picture -->
+					<figure>
+						<img class="img-radius" src="img/teamctrWorking.jpg" alt="CTR working hard.">
+						<figcaption>Team CTR performing the <em>very</em> best.</figcaption>
+						<br>
+					</figure>
+					
+					<!-- The second paragraph -->
+					<article>
+						<p class="story-time">"What is the story behind the game, Roope?"
+						<br><br>
+						"One day, we just went to eat to the cafeteria and Niko said this stupid joke about 
+						combining the famous Finnish bodybuilder's name 'Bull Mentula' and the Japanese 
+						animation's name Full Metal Alchemist and turned it to 'Bull Mental Alchemist'. 
+						That is where it all started."
+						<br>
+						<br>
+						"Why does the main character have to get to the gym?"
+						<br>
+						<br>
+						"Well... *awkward laughing* The main character in the game is Bull Mentula himself, so
+						it is very obvious why he needs to get to the gym.</p>
+						<br>
+					</article>
+					
+					<!-- The third picture -->
+					<figure>
+						<img class="img-radius" src="img/teamctrCoding.jpg" alt="coding on screen">
+						<figcaption>The project included unimaginable amount of coding. However,
+						<br>
+						the endless rows of code did not break the will of Team CTR.</figcaption>
+						<br>
+					</figure>
+					
+					<!-- The third paragraph -->
+					<article>
+						<p class="story-time">"Henrik, you were offered a job from NSA. Your outstanding programming skills were noticed. 
+						How do you comment that?"
+						<br><br>
+						"Nah, I'll stick to my guitar", said Henrik like nothing happened.</p>
+						<br>
+					</article>
+					
+					<!-- The fourth picture -->
+					<figure>
+						<img class="img-radius" src="img/teamctrRahkaPose.jpg" alt="Team CTR with rahka">
+						<figcaption>The secret power source behind the work.</figcaption>
+						<br>
+					</figure>
+				
+					<!-- The fourth paragraph -->
+					<article>
+						<p class="story-time"> 
+						According to the team, 
+						Henrik did the most complicated coding and others assisted with the code development. 
+						Ville and Roope did most of the graphic designs and the animation of the main character. 
+						Niko did the coding to the final boss and some graphical elements. All in all, everyone helped
+						each other whenever needed.</p>
+						<br>
+					</article>
+					
+					<!-- The fifth picture -->
+					<figure>
+						<img class="img-radius" src="img/teamctrLevelEdit.jpg" alt="level editing with unity">
+						<figcaption>Level editing with Unity in progress. Occasionally,
+						<br>
+						the mass editing caused headache to the team members.</figcaption>
+						<br>
+					</figure>
+					
+					<!-- The fifth paragraph -->	
+					<article>
+						<p class="story-time">"Were there hardships with the game?"
+						<br><br>
+						Ville: "Towards the end, some important features were not finished and 
+						time was running out. Nevertheless, we succeeded to put all the wanted features to the 
+						game. It was a relief.
+						<br><br>
+						Roope: "Proper scaling in the game objects was messed up many times and 
+						consequently the full screen property did not work. It brought
+						us trouble again and again. Through the hardships, we have learned many new things."</p>
+						<br>
+					</article>
+				
+					<!-- The team CTR picture with final pose -->	
+					<figure>
+						<img class="img-radius" src="img/teamctrPose.jpg" alt="CTR final pose">
+						<figcaption>The final photo taken of the satisfied CTR team.
+						<br>
+						As you can see, Henrik has no teeth.</figcaption>
+						<br>
+					</figure>
+					
+					<!-- The last paragraph -->					
+					<article>
+						<p class="story-time">"And for the last question... Was it worth it?"
+						<br><br>
+						"Totally!", shouts the team.</p>
+						<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+					</article>
+				
+					<!-- The fixed text in the bottom-right corner -->
+					<section class="footer-ctr-text">
+						<p>Team CTR™</p>
+					</section>
+					
+				</div>	
+			</section>
+		</main>
+		
+        <script src="js/vendor/modernizr-3.5.0.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.2.1.min.js"><\/script>')</script>
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+	</body>
+</html>
