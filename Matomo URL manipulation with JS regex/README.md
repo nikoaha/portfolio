@@ -116,7 +116,7 @@ var getRegUrl = url.replace(url.match(reg).groups.siteNum, "");
 Adds a section to matomo 'Page Titles' section. All hits with this code are 
 resulted here.
 ```
-_paq.push(['setDocumentTitle', 'Cloud Overview']);
+_paq.push(['setDocumentTitle', 'New Overview']);
 ```
 
 Finally, this here adds the hit  to the tracked pages list.
