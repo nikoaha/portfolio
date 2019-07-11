@@ -6,7 +6,7 @@ This project was implemented to leave out an ID number that was provided with a 
 
 So what we do here:
 Original URL: https://matomo.xxxxx.fi/4
-Edited URL: https://matomo.xxxxx.fi/    <- we left the ID number out
+ Edited URL: https://matomo.xxxxx.fi/    <- we left the ID number out
 
 ## How it's done
 
