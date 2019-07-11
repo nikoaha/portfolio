@@ -8,9 +8,9 @@ So what we do here:
 Original URL: https://matomo.xxxxx.fi/4  
 Edited URL: https://matomo.xxxxx.fi/    <- we left the ID number '4' out.
 
-Also works in cases like:
-Original URL: https://matomo.xxxxx.fi/4151521412/board/president/  
-Edited URL: https://matomo.xxxxx.fi/board/president    <- we left the ID number '4' out.
+Also works in cases like:  
+Original URL: https://matomo.xxxxx.fi/4151521412/board/president/    
+Edited URL: https://matomo.xxxxx.fi/board/president      <- we left the ID number '4' out.
 
 This way we can unify all the same page hits to same folders.
 -> The better collective data, the better data analyzing.
