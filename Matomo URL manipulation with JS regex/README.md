@@ -48,7 +48,7 @@ For example:
 var url = location.href;
 var reg = /^(?<domain>https:\/\/[^\/]+)(?<siteNum>\/\d+)/;
 var getRegUrl = url.replace(url.match(reg).groups.siteNum, "");
-_paq.push(['setDocumentTitle', 'Cloud Overview']);
+_paq.push(['setDocumentTitle', 'New Overview']);
 _paq.push(['setCustomUrl', getRegUrl]);
 ```
 
@@ -93,7 +93,7 @@ Overview:
 var url = location.href;
 var reg = /^(?<domain>https:\/\/[^\/]+)(?<siteNum>\/\d+)/;
 var getRegUrl = url.replace(url.match(reg).groups.siteNum, "");
-_paq.push(['setDocumentTitle', 'Cloud Overview']);
+_paq.push(['setDocumentTitle', 'New Overview']);
 _paq.push(['setCustomUrl', getRegUrl]);
 ```
 
