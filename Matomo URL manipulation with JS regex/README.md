@@ -6,13 +6,14 @@ This project was implemented to leave out an ID number that was provided with a 
 
 So what we do here:  
 Original URL: https://matomo.xxxxx.fi/4  
-Edited URL: https://matomo.xxxxx.fi/    <- we left the ID number out
+Edited URL: https://matomo.xxxxx.fi/    <- we left the ID number '4' out
+
+This way we can unify all the same page hits to same folders.
+-> The better collective data, the better data analyzing.
 
 ## How it's done
 
-
-
-We customize the code that is included with every web page that Matomo tracks.
+We customize the code that is included with every web page that Matomo tracks. (case-sensitive)
 
 For example:
 
@@ -35,21 +36,47 @@ For example:
 
 ```
 
-Matomo provides this code for every page. They differ a bit - you can find
-your own code provided for each tracked page from Matomo.
+...by adding this piece of code after the comment /* tracker method [...] */.
 
-In our customized code, the custom code is located in the rows 10 to 16. 
-With these seven rows of code, we leave out the provet ID of the URL.
+```
+var url = location.href;
+var reg = /^(?<domain>https:\/\/[^\/]+)(?<siteNum>\/\d+)/;
+var getRegUrl = url.replace(url.match(reg).groups.siteNum, "");
+```
 
-For example:
+Eventually it looks like this:
 
-From this -> https://test.provetcloud.com/4
--> to this -> https://test.provetcloud.com/   <- we left out the ID '4'
+```
+<!-- Matomo -->
+<script type="text/javascript">
+    var _paq = window._paq || [];
+    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+    /* START of custom matomo pageviewer code, place before 'trackPageView' */
+    var url = location.href;
+    var reg = /^(?<domain>https:\/\/[^\/]+)(?<siteNum>\/\d+)/; // locate the url directory int
+    var getRegUrl = url.replace(url.match(reg).groups.siteNum, ""); // replace it with nothing
+    _paq.push(['setDocumentTitle', 'New Overview']); // for matomo "Behaviour/Page" titles section
+    _paq.push(['setCustomUrl', getRegUrl]);
+    /* END of custom matomo pageviewer code, place before 'trackPageView' */
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function () {
 
-This way we can unify all the same page hits to same folders.
--> The better collective data, the better data analyzing.
- 
+        // Case-sensitive info here - can be found from your own Matomo dashboard.
+
+        var u = "//matomo.xxxxx.fi/"; 
+        _paq.push(['setTrackerUrl', u + 'matomo.php']);
+        _paq.push(['setSiteId', '4']);
+        var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+        g.type = 'text/javascript'; g.async = true; g.defer = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
+    })();
+</script>
+<!-- End Matomo Code -->
+```
+
 ## Documentation
+
+Every row of the code is explained here step-by-step.
 
 Overview:
 ```
