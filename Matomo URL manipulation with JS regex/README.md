@@ -1,10 +1,8 @@
 # Matomo URL manipulation with JS regex
 
-Track pages with Matomo regardless of the url ID number.
+Track pages with Matomo tracking service regardless of the url ID number.
 
 This project was implemented to leave out a user ID number that was provided with a certain cloud service's url for matomo's tracking service.
-
-Notice that we don't change the url on the browser in any way - the url is just reported as a modified url to Matomo service.
 
 So what we do here:  
 Original URL: https://matomo.xxxxx.fi/4  
@@ -16,6 +14,8 @@ Edited URL: https://matomo.xxxxx.fi/board/president
 
 This way we can unify all the same page hits to same folders regardless of the user ID.
 -> The better collective data, the better data analyzing.
+
+Notice that we don't change the url on the browser in any way - the url is just reported as a modified url to Matomo service.
 
 ## How it's done
 
