@@ -14,10 +14,11 @@ In this project, the idea was to be able to access a physical USB customer
 display device via Google Chrome browser. The WebUSB API was the solution for 
 this kind of implementation.
 
-The final version of this  project is meant to be run for a cloud service. When the seller adds 
+The final version of this project is meant to be run for a cloud service. When the seller adds 
 items to the invoice during counter sale, each product's name and price are
 printed to the customer display screen. Also when finalizing the invoice, 
-the total price is shown to the screen to the customer.
+the total price is shown to the screen to the customer. This version 
+seen here in this folder is just a working test version with .html and .js files.
 
 The aim was to make the communication with the device as simple as possible 
 without any special set ups. Plug-and-play is the desired action for this 
