@@ -51,6 +51,7 @@ Eventually it looks like this:
 <script type="text/javascript">
     var _paq = window._paq || [];
     /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+    
     /* START of custom matomo pageviewer code, place before 'trackPageView' */
     var url = location.href;
     var reg = /^(?<domain>https:\/\/[^\/]+)(?<siteNum>\/\d+)/; // locate the url directory int
@@ -58,6 +59,7 @@ Eventually it looks like this:
     _paq.push(['setDocumentTitle', 'New Overview']); // for matomo "Behaviour/Page" titles section
     _paq.push(['setCustomUrl', getRegUrl]);
     /* END of custom matomo pageviewer code, place before 'trackPageView' */
+    
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
     (function () {
