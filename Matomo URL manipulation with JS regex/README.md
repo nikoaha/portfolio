@@ -1,6 +1,16 @@
 # matomo-custom-tracker
 
-Track pages with Matomo regardless of the provet ID.
+Track pages with Matomo regardless of the url ID.
+
+This project was implemented to leave out an ID number that was provided with a cloud service's url for matomo's tracking service.
+
+So what we do here:
+Original URL: https://matomo.xxxxx.fi/4
+Edited URL: https://matomo.xxxxx.fi/    <- we left the ID number out
+
+## How it's done
+
+
 
 We customize the code that is included with every web page that Matomo tracks.
 
@@ -14,7 +24,7 @@ For example:
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
     (function () {
-        var u = "//matomo.fns.fi/";
+        var u = "//matomo.xxxxx.fi/";
         _paq.push(['setTrackerUrl', u + 'matomo.php']);
         _paq.push(['setSiteId', '4']);
         var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
@@ -39,11 +49,7 @@ From this -> https://test.provetcloud.com/4
 This way we can unify all the same page hits to same folders.
 -> The better collective data, the better data analyzing.
  
- 
--------------------------------------------------------------------------------
- 
- 
-Documentation for the custom code:
+## Documentation
 
 Overview:
 ```
