@@ -42,7 +42,7 @@ For example:
 
 ```
 
-...by adding this piece of code after the comment /* tracker method [...] */.
+...by adding this piece of code after the comment `/* tracker method [...] */`.
 
 ```
 var url = location.href;
