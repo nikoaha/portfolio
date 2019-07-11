@@ -4,13 +4,15 @@ Track pages with Matomo regardless of the url ID number.
 
 This project was implemented to leave out an ID number that was provided with a certain cloud service's url for matomo's tracking service.
 
+Notice that we don't change the url on the browser in any way - the url is just reported as a different url to Matomo service.
+
 So what we do here:  
 Original URL: https://matomo.xxxxx.fi/4  
 Edited URL: https://matomo.xxxxx.fi/    <- we left the ID number '4' out.
 
 Also works in cases like:  
 Original URL: https://matomo.xxxxx.fi/4151521412/board/president/    
-Edited URL: https://matomo.xxxxx.fi/board/president      <- we left the ID number '4' out.
+Edited URL: https://matomo.xxxxx.fi/board/president
 
 This way we can unify all the same page hits to same folders.
 -> The better collective data, the better data analyzing.
