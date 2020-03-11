@@ -1,0 +1,779 @@
+"""    
+    * *   * *
+     * *   * * 
+      * *   * *   Logistics System project utilizing SARSA in a trial environment
+       * *   * *  Main Author: Niko Haapalainen, Tokyo Kosen project exchange
+      * *   * *   Version 10 "MULTIPLE AGENT VERSION - START FROM DIFFERENT LOCACTIONS" - 27日1月2020年
+     * *   * *
+    * *   * * 
+    
+    This is my innovation project program developed in National Institute of Technology, Tokyo College
+    between September 2019 to March 2020. 
+    
+    It is a logistics system, in which we simulated and experimented the performance of SARSA algorithm 
+    from reinforcement learning area of machine learning. The target is to deliver the foods between 
+    the coordinates (food facilities) and keep the coordinates food stocks balanced. This version is done by
+    using two agents starting from the same location, traversing between the coordinates and then returning
+    back to coordinate 1.
+    
+    Currently the program can reach the target, but the success rate might vary.
+    
+    Note that this program is just a trial version study to experiment SARSA in this environment, which was
+    my task back then.
+    
+    Developed with Python 3 in Jupyter Notebook environment.
+    
+"""
+
+print(" \n\n   ////////////////\n   PROGRAM STARTED!\n   ////////////////\n\n")
+
+#
+# IMPORT LIBRARIES
+#
+import numpy as np
+import random, math, time, sys
+import matplotlib.pyplot as plt
+#import matplotlib.ticker as ticker
+from IPython.display import clear_output
+from copy import deepcopy as dc
+
+#
+# If plotter_activated is 'True', then plotter will be activated for the last two episodes (episodes 199 and 200).
+#
+plotter_activated = False
+
+#
+# INITIATE ENVIRONMENT COORDINATES, ROUTES AND HYPERPARAMETERS
+#
+city = { 1: [1,1], 2: [2.5,2], 3: [4,10], 4: [2,9] }
+cityRoutes = { 1: [2,3,4], 2: [1,3,4], 3: [1,2,4], 4: [1,2,3] }
+alpha, gamma, epsilon = 0.1, 0.9, 0.1     # The learning rate, Worth of future rewards, For epsilon-greedy
+
+#
+# INITIATE ORDER CONSTRAINT
+#
+#   Edit 14日1月2020年:
+#   Not working at the moment.
+#   Should be fixed later.
+#
+order_constraints = { 1: [2,3] } #2: [3,4]
+
+#
+# INITIATE MAXIMUM CARRYING CAPACITY (VOLUME) CONSTRAINT:
+#
+# Values inside food_values are constant.
+# Values inside stocks, give_foods, get_foods can change during program execution.
+#
+food_values = { 'banana_box': 5, 'apple_box': 10, 'melon_box': 20 } # NOTE: CONSTANT VALUES
+
+stocks = { 2: { 'banana_box': 0, 'apple_box': 0, 'melon_box': 0 }, 
+           3: { 'banana_box': 1, 'apple_box': 0, 'melon_box': 0 }, 
+           4: { 'banana_box': 0, 'apple_box': 3, 'melon_box': 0 }  }
+
+get_foods = { 2: { 'banana_box': 0, 'apple_box': 0, 'melon_box': 0 },
+              3: { 'banana_box': 1, 'apple_box': 0, 'melon_box': 0 },
+              4: { 'banana_box': 0, 'apple_box': 3, 'melon_box': 0 }  }
+
+give_foods = { 2: { 'banana_box': 1, 'apple_box': 0, 'melon_box': 0 },
+               3: { 'banana_box': 0, 'apple_box': 1, 'melon_box': 1 },
+               4: { 'banana_box': 1, 'apple_box': 0, 'melon_box': 1 }  }
+
+food_on_truck = { 'banana_box': 2, 'apple_box': 2, 'melon_box': 2 }
+food_on_truck_agent2 = { 'banana_box': 2, 'apple_box': 2, 'melon_box': 2 }
+
+cargo_volume, cargo_volume_agent2, max_capacity = 0, 0, 100
+
+orig_give_foods, orig_get_foods, orig_stocks = dc(give_foods), dc(get_foods), dc(stocks)
+orig_food_on_truck, orig_food_on_truck_agent2 = dc(food_on_truck), dc(food_on_truck_agent2)
+
+#
+# THIS DICTIONARY KEEPS A LIST WHETHER EACH OF THE CITIES ARE SATISFIED
+# A global list for both agent 1 and agent 2. They can communicate
+# with each other passively with this dictionary.
+#
+foods_delivered = { 2:0, 3:0, 4:0 }
+
+#
+# INITIALIZE Q FUNCTION (for agent1 and agent2)
+#
+Q = {}
+for state in range(1,5):             # 4 possible states, or cities
+    for action in range(1,5):        # 4 possible actions
+        Q[state, action] = 1 if (state != action) else 0
+
+Q_agent2 = {}
+for state in range(1,5):             
+    for action in range(1,5):
+        Q_agent2[state, action] = 1 if (state != action) else 0
+
+        
+#
+# CHOOSE RANDOM ACTION (AGENT 1)
+#
+def choose_rand_action(state):
+    
+    global cityRoutes, previous_choice
+    routeList = cityRoutes[state]
+    
+    while True:
+        num = random.randrange(0, 3) # Random int between 0-3
+        choice = routeList[num]
+        
+        print("choice_rand_action() generated: ", choice)
+        
+        if choice != 1 and foods_delivered[choice] == 0:  
+            print("OK, proceeding with choice: ", choice)
+            break
+        
+        #elif list(foods_delivered.values()) == [0,1,1]:
+        #    print("OOPS! Dead end for agent 1... Now returning to city 1!")
+        #    choice = 1
+        #    break
+        
+        elif check_deliveries():
+            choice = 1
+            print("Brute force, random choice: ", choice)
+            break
+        
+        print("If this is printed, then no if-condition were satisfied in choose_rand_action().")    
+
+    return choice
+
+#
+# CHOOSE RANDOM ACTION (AGENT 2)
+#
+def choose_rand_action_agent2(state):
+    
+    global cityRoutes
+    routeList = cityRoutes[state]
+    
+    while True:
+        num = random.randrange(0, 3) # Random int between 0-3
+        choice_agent2 = routeList[num]
+        
+        print("choice_rand_action_agent2() generated: ", choice_agent2)
+        
+        if choice_agent2 != 1 and foods_delivered[choice_agent2] == 0:  
+            print("OK, proceeding with choice for agent 2: ", choice_agent2)
+            break
+            
+        #elif list(foods_delivered.values()) == [0,1,1]:
+        #    print("OOPS! Dead end for agent 2... Now returning to city 1!")
+        #    choice = 1
+        #    break
+        
+        elif check_deliveries():
+            choice_agent2 = 1
+            print("Brute force agent 2, random choice: ", choice_agent2)
+            break
+            
+        print("If this is printed, then no if-condition were satisfied in choose_rand_action_agent2().")  
+        
+    return choice_agent2
+
+#
+# CHOOSE ACTION FROM Q FUNCTION (AGENT 1)
+#
+def maxAction(Q, state):
+    values = np.array([Q[state,a] for a in range(1,5)])
+    
+    while True:
+        action = np.argmax(values)
+        action += 1 # corrects the indexation
+        
+        print("maxAction() generated: ", action)
+        
+        if state == action: # Prevent the agent from polling in its current state.
+            values[action-1] = -1000
+            continue
+        
+        if check_deliveries():
+            action = 1
+            print("All deliveries are satisfied, brute forcing to city 1...")
+            break
+        
+        # ----------------
+        
+        if action != 1 and foods_delivered[action] == 1:
+            print("Chosen action destination [{}] ready satisfied! Continuing... ".format(action))
+            values[action-1] = -1000
+            continue
+        
+        elif action != 1 and foods_delivered[action] == 0:
+            break
+            
+        #elif list(foods_delivered.values()) == [0,1,1,1]:
+        #    print("OOPS! Dead end at maxAction()... Now moving back to city 1!")
+        #    action = 1
+        #    break
+            
+        elif action == 1:
+            values[action-1] = -1000
+            
+        print("If this is printed, then no if-condition were satisfied in maxAction().")       
+            
+    return action
+
+#______________________________________________________________________________________________________________________________
+
+#
+# CHOOSE ACTION FROM Q FUNCTION (AGENT 2)
+#
+def maxAction_agent2(Q_agent2, state):
+    values = np.array([Q_agent2[state,a] for a in range(1,5)])
+    
+    while True:
+        action_agent2 = np.argmax(values)
+        action_agent2 += 1 # corrects the indexation
+        
+        print("maxAction_agent2() generated: ", action_agent2)
+        
+        if state == action_agent2: # Prevent the agent from polling in its current state.
+            values[action_agent2-1] = -1000
+            continue
+        
+        if check_deliveries():
+            action_agent2 = 1
+            print("All deliveries are satisfied, brute forcing to city 3...")
+            break
+            
+        # ----------------
+            
+        if action_agent2 != 1 and foods_delivered[action_agent2] == 1:
+            print("Chosen action destination [{}] ready satisfied! Continuing... ".format(action_agent2))
+            values[action_agent2-1] = -1000
+            continue
+        
+        elif action_agent2 != 1 and foods_delivered[action_agent2] == 0:
+            #past "not returning a city, where food exchange is completed" constraint
+            break
+            
+        #elif list(foods_delivered.values()) == [0,1,1]:
+        #    print("OOPS! Dead end at maxAction_agent2()... Now moving back to city 3!")
+        #    action_agent2 = 1
+        #    break
+            
+        elif action_agent2 == 1:
+            values[action_agent2-1] = -1000
+         
+        print("If this is printed, then no if-condition were satisfied in maxAction_agent2().")       
+            
+    return action_agent2
+
+#
+# UPDATE Q FUNCTION
+#
+def learn(state, action, reward, state_, action_):
+    predict = Q[state, action]
+    target = reward + gamma * Q[state_, action_]
+    Q[state, action] = round(Q[state, action] + alpha * (target - predict), 1)
+    
+def learn_agent2(state, action, reward, state_, action_):
+    predict = Q_agent2[state, action]
+    target = reward + gamma * Q_agent2[state_, action_]
+    Q_agent2[state, action] = round(Q_agent2[state, action] + alpha * (target - predict), 1) 
+    
+#
+# CALCULATE THE RAW DISTANCE BETWEEN COORDINATES
+#
+def calcDistance(x1, y1, x2, y2):
+    distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    distance = round(distance, 2)
+    return distance
+    
+#
+# ... AND APPEND THE CALCULATED DISTANCE TO DISTANCE LIST FOR THE AGENT 1.
+#
+def addToDistanceList(state, action):
+    global distanceList
+    distanceList.append(calcDistance(city[state][0], city[state][1], city[action][0], city[action][1]))
+    
+#
+# ... AND ALSO FOR THE AGENT 2.
+#
+def addToDistanceList_agent2(state, action):
+    global distanceList_agent2
+    distanceList_agent2.append(calcDistance(city[state][0], city[state][1], city[action][0], city[action][1]))
+    
+#
+# RETURN TRUE IF ALL FOODS ARE DELIVERED IN A CITY (= IS THE CITY SATISFIED?)
+#
+def check_deliveries():
+    return all(value == 1 for value in foods_delivered.values())
+
+#
+# CHECK CARGO SIZE - STOP PROGRAM IF MAX VOLUME EXCEEDED
+#
+def check_cargo_size():
+    global cargo_volume
+    for particle in list(food_on_truck):
+        quantity, value = food_on_truck[particle], food_values[particle]
+        for i in range(quantity):
+            cargo_volume += value if cargo_volume+value <= max_capacity else sys.exit()
+            #print(cargo_volume)
+
+def check_cargo_size_agent2():
+    global cargo_volume_agent2
+    for particle in list(food_on_truck_agent2):
+        quantity, value = food_on_truck_agent2[particle], food_values[particle]
+        for i in range(quantity):
+            cargo_volume_agent2 += value if cargo_volume_agent2+value <= max_capacity else sys.exit()
+            #print(cargo_volume_agent2)
+        
+#
+# FOR VIEWING THE LOG OF HISTORY OF CHOSEN PATHS
+#
+def list_history(listlog, listlog_agent2):
+    print(" #\n #\n # START VISITEDCITIES DISPLAY FOR AGENT 1 AND AGENT 2\n")
+    ye = 1    
+    for (list_, list_a2) in zip(listlog, listlog_agent2):
+        print("Episode {} ".format(ye), list_, "     ", list_a2)
+        ye += 1
+    
+#
+# GIVE AND GET FOOD PARTICLE FROM AGENT TO THE CURRENT CITY (AGENT 1)
+#
+def food_exchange(city):
+    global cargo_volume
+    
+    temp = give_foods[city]
+    for particle in temp:
+        if give_foods[city][particle] != 0:
+            if food_on_truck[particle] != 0:
+                
+                food_on_truck[particle] -= temp[particle] #if food_on_truck[particle] != 0 else sys.exit()
+                cargo_volume -= food_values[particle]
+                stocks[city][particle] += temp[particle]
+                give_foods[city][particle] -= temp[particle]
+                #print("CARGO_VOL_GIVE: ", cargo_volume)
+                
+    temp = get_foods[city]
+    for particle in temp:
+        if get_foods[city][particle] != 0:
+            
+            quantity, value = get_foods[city][particle], food_values[particle] #1, 5
+            for i in range(quantity):
+                if cargo_volume+value <= max_capacity:
+                    stocks[city][particle] -= 1
+                    food_on_truck[particle] += 1
+                    get_foods[city][particle] -= 1
+                    cargo_volume += value
+                    #print("CARGO_VOL_GET: ", cargo_volume)
+    
+    #print("GetF: ", all(value == 0 for value in get_foods[city].values()))
+    #print("GiveF: ", all(value == 0 for value in give_foods[city].values()))
+    
+    if all(value == 0 for value in get_foods[city].values()) == True \
+        and all(value == 0 for value in give_foods[city].values()) == True:
+        foods_delivered[city] = 1
+        print("Foods exchanged in city {} and is now satisfied!".format(city))
+    else:
+        print("Foods exchanged, but city {} is not satisfied yet.".format(city))
+
+#
+# GIVE & GET FOOD PARTICLE FROM AGENT TO THE CURRENT CITY (AGENT 2)
+#
+def food_exchange_agent2(city):
+    global cargo_volume_agent2
+    
+    temp = give_foods[city]
+    for particle in temp:
+        if give_foods[city][particle] != 0:
+            if food_on_truck_agent2[particle] != 0:
+                
+                food_on_truck_agent2[particle] -= temp[particle] #if food_on_truck[particle] != 0 else sys.exit()
+                cargo_volume_agent2 -= food_values[particle]
+                stocks[city][particle] += temp[particle]
+                give_foods[city][particle] -= temp[particle]
+                #print("CARGO_VOL_GIVE, AGENT 2: ", cargo_volume_agent2)
+                
+    temp = get_foods[city]
+    for particle in temp:
+        if get_foods[city][particle] != 0:
+            
+            quantity, value = get_foods[city][particle], food_values[particle] #1, 5
+            for i in range(quantity):
+                if cargo_volume_agent2+value <= max_capacity:
+                    stocks[city][particle] -= 1
+                    food_on_truck_agent2[particle] += 1
+                    get_foods[city][particle] -= 1
+                    cargo_volume_agent2 += value
+                    #print("CARGO_VOL_GET, AGENT 2: ", cargo_volume_agent2)
+    
+    #print("GetF (after agent2): ", all(value == 0 for value in get_foods[city].values()))
+    #print("GiveF (after agent2): ", all(value == 0 for value in give_foods[city].values()))
+    
+    if all(value == 0 for value in get_foods[city].values()) == True \
+        and all(value == 0 for value in give_foods[city].values()) == True:
+        foods_delivered[city] = 1 ##########################################################Pitää vaihtaa...
+        print("Foods exchanged in city {} and is now satisfied! (via agent 2)".format(city))
+    else:
+        print("Foods exchanged, but city {} is not satisfied yet (via agent 2).".format(city)) 
+
+#
+# PLOTS A REAL-TIME GRAPHICAL FIGURE
+#
+def plotter(curX, curY, curX_agent2, curY_agent2):
+    
+    global city, food_on_truck_agent2
+    x = [city[1][0], city[2][0], city[3][0], city[4][0]]
+    y = [city[1][1], city[2][1], city[3][1], city[4][1]]
+    
+    clear_output()
+    plt.plot(x, y, 'ko') # CITIES
+    plt.plot(curX, curY, 'ro') # AGENT 2 LOCATION IN PLOT
+    plt.plot(curX_agent2, curY_agent2, 'bo') # AGENT 2 LOCATION IN PLOT
+    #plt.text(1.1, 1, "city 1, START")
+    plt.text(1.1, 1, "city 1: {}".format("Start position"))
+    plt.text(2.6, 2, "city 2: {}".format(stocks[2]))
+    plt.text(4, 9.35, "city 3: {}".format(stocks[3]))
+    plt.text(2.05, 8.4, "city 4: {}".format(stocks[4]))
+    plt.text(0.85, -2, "1 food on truck: {}".format(food_on_truck))
+    plt.text(0.85, -2.7, "2 food on truck: {}".format(food_on_truck_agent2))
+    plt.show()
+    print("GIVE FOODS: \n", give_foods[2], "\n", give_foods[3], "\n", give_foods[4])
+    print("\n")
+    print("GET FOODS: \n", get_foods[2], "\n", get_foods[3], "\n", get_foods[4])
+    print("\n")
+    print("STOCKS: \n", stocks[2], "\n", stocks[3], "\n", stocks[4])
+    print("\n")
+    time.sleep(3.0)
+    clear_output()
+
+#
+# PRINT FINAL REPORT
+#
+def final_report():
+
+    clear_output()
+    
+    ### EPISODE TAKEN ROUTES
+    list_history(listlog, listlog_agent2)
+    
+    ### Q-VALUE PRINT (AGENT 1)
+    
+    print("\n\n\nFINAL REPORT (MULTI-AGENT SETTING): state (vertical), action (horizontal)")
+    print("\nAgent 1 Q-values:")
+    for state in range(1,5):
+        print()
+        for action in range(1,5):
+            print(Q[state, action], end = ' ')
+            
+    ### Q-VALUE PRINT (AGENT 2)
+    
+    print("\n\nAgent 2 Q-values:")
+    for state in range(1,5):
+        print()
+        for action in range(1,5):
+            print(Q_agent2[state, action], end = ' ')
+    
+    ### PRINT GRAPH 1 DISTANCE PROGRESSION (AGENT 1)
+    
+    plt.clf()
+    plt.plot(distListPlot, 'b--')
+    plt.xlabel('Episodes')
+    plt.ylabel('Distance')
+    plt.title('1) Distance progression, agent 1')
+    plt.show()
+    
+    plt.clf()
+    
+    ### PRINT GRAPH 1 DISTANCE PROGRESSION (AGENT 2)
+    
+    plt.clf()
+    plt.plot(distListPlot_agent2, 'r--')
+    plt.xlabel('Episodes')
+    plt.ylabel('Distance')
+    plt.title('2) Distance progression, agent 2')
+    plt.show()
+    
+    plt.clf()
+    
+    # NEW REPORTS HERE
+    ### PRINT GRAPH 3 DISTANCE PROGRESSION (AGENT 2)
+    
+    plt.clf()
+    plt.plot(distListPlot_combined, 'g--')
+    plt.xlabel('Episodes')
+    plt.ylabel('Distance')
+    plt.title('3) Distance progression, agent 1 and 2 combined')
+    plt.show()
+    
+    plt.clf()
+
+    # PRINT GRAPH 2 (AGENT 1)
+    
+    value_candidates = np.unique(distListPlot) # 20.24 20.52 28.32 32.02 33.01
+    x_pos = np.arange(len(value_candidates)) 
+    results = []
+
+    for value in value_candidates:
+        results.append(distListPlot.count(value) * 100 / total_episodes)
+        
+    plt.bar(x_pos, results, align='center', color='blue')
+    plt.xticks(x_pos, value_candidates)
+    plt.xlabel('Distance')
+    plt.ylabel('Frequency (%)')
+    plt.title('Overview on travelled distances, agent 1')
+    x1,x2,y1,y2 = plt.axis()
+    plt.axis((x1,x2,0,105))
+    
+    count, y_axis = 0, 80
+    plt.text(6, y_axis, "% on each result:")
+    y_axis -= 10
+    for unique in value_candidates:
+        plt.text(6, y_axis, "{}: {}%".format(unique, results[count]))
+        count += 1
+        y_axis -= 10
+    
+    plt.show()
+    
+    # PRINT GRAPH 2 (AGENT 2)
+    
+    plt.clf()
+    
+    value_candidates_agent2 = np.unique(distListPlot_agent2) # 20.24 20.52 28.32 32.02 33.01 for instance...
+    x_pos_agent2 = np.arange(len(value_candidates_agent2))
+    results_agent2 = []
+
+    for value in value_candidates_agent2:
+        results_agent2.append(distListPlot_agent2.count(value) * 100 / total_episodes)
+        
+    plt.bar(x_pos_agent2, results_agent2, align='center', color='red')
+    plt.xticks(x_pos_agent2, value_candidates_agent2)
+    plt.xlabel('Distance')
+    plt.ylabel('Frequency (%)')
+    plt.title('Overview on travelled distances, agent 2')
+    x1,x2,y1,y2 = plt.axis()
+    plt.axis((x1,x2,0,105))
+    
+    count_, y_axis_ = 0, 80
+    plt.text(6, y_axis_, "% on each result:")
+    y_axis_ -= 10
+    for unique in value_candidates_agent2:
+        plt.text(6, y_axis_, "{}: {}%".format(unique, results_agent2[count_])) #9ijn
+        count_ += 1
+        y_axis_ -= 10
+    
+    plt.show()
+    
+    # PRINT GRAPH 3 (AGENT 1 & 2 COMBINED) #huut
+
+    plt.clf()
+    
+    value_candidates_comb = np.unique(distListPlot_combined) # 20.24 20.52 28.32 32.02 33.01 for instance...
+    x_pos_comb = np.arange(len(value_candidates_comb))
+    results_comb = []
+
+    for value in value_candidates_comb:
+        results_comb.append(distListPlot_combined.count(value) * 100 / total_episodes)
+        
+    plt.bar(x_pos_comb, results_comb, align='center', color='green')
+    plt.xticks(x_pos_comb, value_candidates_comb)
+    plt.xlabel('Distance')
+    plt.ylabel('Frequency (%)')
+    plt.title('Overview on travelled distances, agent 1 and agent 2')
+    x1,x2,y1,y2 = plt.axis()
+    plt.axis((x1,x2,0,105))
+    
+    count_comb, y_axis_comb = 0, -40
+    plt.text(6, y_axis_comb, "% on each result:")
+    y_axis_comb -= 10
+    for unique in value_candidates_comb:
+        plt.text(6, y_axis_comb, "{}: {}%".format(unique, results_comb[count_comb])) #9ijn
+        count_comb += 1
+        y_axis_comb -= 10
+    
+    plt.show()
+    
+#
+# INITIALIZE INSTANCE VARIABLES, FLAGS, CONSTANTS AND LISTS
+#
+# FOR AGENT 1 AND AGENT 2
+total_episodes, max_steps, distListPlot_combined = 200, 20, []
+
+# FOR AGENT 1
+rewards, prev_distance, listlog = 0, 10000, []
+total_rewards, distanceList, visitedCities, distListPlot = [], [], [], []
+
+# FOR AGENT 2
+rewards_agent2, prev_distance_agent2, listlog_agent2 = 0, 10000, []
+total_rewards_agent2, distanceList_agent2, visitedCities_agent2, distListPlot_agent2 = [], [], [], []
+
+check_cargo_size() # そもそもオバーフローないの為に出荷のボリュームを確認する。
+check_cargo_size_agent2()
+
+#
+# TOOLS FOR THE ALGORITHM LOOP
+#
+def give_rewards(ep):
+    global prev_distance, rewards, total_rewards
+    new_distance = sum(distanceList)
+
+    if new_distance <= prev_distance:
+        rewards += 10
+        print("Is shorter route >>> Agent 1 received +10 rewards!")
+        prev_distance = new_distance
+        print("prev_distance is now: ", prev_distance)
+
+    elif new_distance > prev_distance:
+        if rewards-5 >= 0: 
+            rewards -= 5
+            print("Is longer route >>> Agent 1 received -5 penalty!")
+
+    else: print("If this is printed, then no rewards option was chosen (Agent 1)!")
+
+    print("\n\n\n")
+    
+#
+# TOOLS FOR THE ALGORITHM LOOP
+#
+def give_rewards_agent2(ep):
+    global prev_distance_agent2, rewards_agent2, total_rewards_agent2
+    new_distance = sum(distanceList_agent2)
+
+    if new_distance <= prev_distance_agent2:
+        rewards_agent2 += 10
+        print("Is shorter route >>> Agent 2 received +10 rewards!")
+        prev_distance_agent2 = new_distance
+        print("prev_distance_agent2 is now: ", prev_distance_agent2)
+
+    elif new_distance > prev_distance_agent2:
+        if rewards_agent2-5 >= 0: 
+            rewards_agent2 -= 5
+            print("Is longer route >>> Agent 2 received -5 penalty!")
+
+    else: print("If this is printed, then no rewards option was chosen (Agent 2)!")
+
+    print("\n\n\n")
+    
+
+# RESET INITALIZATION INSTANCE VALUES FOR NEXT EPISODE LOOP
+#
+def reset():
+    global distanceList, visitedCities, cargo_volume, distListPlot_combined, distanceList_agent2
+    global rewards, give_foods, get_foods, stocks, food_on_truck, total_episodes
+    distListPlot.append(round(sum(distanceList), 2)) #Agent 1 dist prog fig
+    combined_sum = distanceList + distanceList_agent2 
+    distListPlot_combined.append(round(sum(combined_sum), 2)) #Agent 1 and 2 combined dist prog fig
+    #order_constraints.update({1: [2,3]})
+    foods_delivered.update({2:0, 3:0, 4:0})
+    total_rewards.append(rewards)
+    distanceList, visitedCities, cargo_volume = [], [], 0
+    give_foods, get_foods, stocks, food_on_truck = dc(orig_give_foods), dc(orig_get_foods), dc(orig_stocks), dc(orig_food_on_truck)
+    check_cargo_size()
+    
+def reset_agent2():
+    global distanceList_agent2, visitedCities_agent2, cargo_volume_agent2
+    global rewards_agent2, food_on_truck_agent2
+    distListPlot_agent2.append(round(sum(distanceList_agent2), 2)) #Agent 2 dist prog fig
+    #order_constraints_agent2.update({1: [x,x]})
+    total_rewards_agent2.append(rewards_agent2)
+    distanceList_agent2, visitedCities_agent2, cargo_volume_agent2 = [], [], 0
+    food_on_truck_agent2 = dc(orig_food_on_truck_agent2)
+    check_cargo_size_agent2()
+    
+#
+# START ALGORITHM LOOP
+#
+for episode in range(total_episodes):
+    
+    print("  --- Episode {} commencing! ---  \n".format(episode+1))
+    print("  --- Step {} commencing! ---  \n".format(1))
+        
+    state = 1
+    action = maxAction(Q, state) if np.random.random() < epsilon else choose_rand_action(state)
+    
+    visitedCities.append(state)
+    addToDistanceList(state, action)
+    
+    state_agent2 = 1
+    action_agent2 = maxAction_agent2(Q_agent2, state_agent2) if np.random.random() < epsilon else choose_rand_action_agent2(state_agent2)
+    
+    visitedCities_agent2.append(state_agent2)
+    addToDistanceList_agent2(state_agent2, action_agent2)
+    
+    ##### PLOTTER #####
+    if plotter_activated:
+        if (episode > total_episodes-3): plotter(city[state][0], city[state][1], city[state_agent2][0], city[state_agent2][1])
+    
+    for step in range(max_steps):
+        
+        if step != 0: print("\n --- Step {} commencing! ---  \n".format(step+1))
+        
+        state_ = action
+        visitedCities.append(state_)
+        
+        state_agent2_ = action_agent2
+        visitedCities_agent2.append(state_agent2_)
+        
+        #_____________________________________________________________________________________________
+        
+        print("\nThe agent 1 is in city: ", state_)
+        print("FD bef: ", foods_delivered)
+        if state_ != 1: food_exchange(state_)
+        print("FD now: ", foods_delivered)
+        print()
+        
+        print("The agent 2 is in city: ", state_agent2_)
+        print("FD 2 bef: ", foods_delivered)
+        if state_agent2_ != 1: food_exchange_agent2(state_agent2_)
+        print("FD 2 now: ", foods_delivered)
+        
+        #_____________________________________________________________________________________________
+        
+        ##### PLOTTER #####
+        if plotter_activated:
+            if (episode > total_episodes-3): plotter(city[state_][0], city[state_][1], city[state_agent2_][0], city[state_agent2_][1])
+
+        #_____________________________________________________________________________________________
+        
+        print()
+        action_ = maxAction(Q, state_) if np.random.random() < epsilon else choose_rand_action(state_) 
+
+        print("")
+        print("\n[",state,",", action,"]")
+        print("[",state_,",", action_,"]")
+        print("Visited cities list (agent 1): {}\n\n".format(visitedCities))
+        
+        #_____________________________________________________________________________________________
+        
+        action_agent2_ = maxAction_agent2(Q_agent2, state_agent2_) if np.random.random() < epsilon else choose_rand_action_agent2(state_agent2_)
+        
+        print("")
+        print("\n[",state_agent2,",", action_agent2,"]")
+        print("[",state_agent2_,",", action_agent2_,"]")
+        print("Visited cities list (agent 2): {}\n".format(visitedCities_agent2))
+
+        #_____________________________________________________________________________________________
+        
+        if state_ == 1 and check_deliveries() == True:
+            if state_agent2_ == 1 and check_deliveries() == True:
+                give_rewards(episode)
+                give_rewards_agent2(episode)
+                break
+
+        learn(state, action, rewards, state_, action_)
+        learn_agent2(state_agent2, action_agent2, rewards_agent2, state_agent2_, action_agent2_)
+        
+        addToDistanceList(state_, action_)
+        addToDistanceList_agent2(state_agent2_, action_agent2_)
+        
+        state, action = state_, action_
+        state_agent2, action_agent2 = state_agent2_, action_agent2_
+        print("\n\n\n")
+    
+    listlog.append(visitedCities)
+    listlog_agent2.append(visitedCities_agent2)
+    
+    reset() # Here we reset the values inside get_foods, give_foods and stocks.
+    reset_agent2()
+    
+    epsilon = epsilon + 2 / total_episodes if epsilon < 0.99 else 0.99
+    print("Episode done! Epsilon: {} \n\n\n\n\n\n\n\n".format(epsilon))
+
+final_report()
+
+#
+#
+# END OF CODE
